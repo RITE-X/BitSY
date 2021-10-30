@@ -23,6 +23,34 @@ namespace BitSY
         public MainWindow()
         {
             InitializeComponent();
+
+            //BitmapSource s = new BitmapImage(new Uri(@"C:\Users\olego\Desktop\Расписание звонков.jpg"));
+            //suka.Source = s;
+        }
+
+
+
+
+        private void Minimize_OnClick(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void Close_OnClick(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+   
+
+        private void TopMenu_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();//TODO FIX
+        }
+
+        private void KeyText_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+         
         }
     }
 }
