@@ -122,27 +122,36 @@
             <MenuItem Name="Close" Header="Выход" HorizontalAlignment="Right" Click="Close_OnClick"/>
         </Menu>
 
-        <ScrollViewer Grid.Row="1" Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto ">
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="4" Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto ">
             <Image  Name="TargetImage" />
         </ScrollViewer>
 
 
 
-        <RichTextBox Name="TargetText" Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
-        <RichTextBox Name="KeyText" Grid.Row="1"  Grid.Column="1" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" MouseDoubleClick="KeyText_OnMouseDoubleClick"></RichTextBox>
+        <RichTextBox Name="TargetText" Grid.Row="5" Grid.RowSpan="2" Grid.Column="0" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
+
+        <Label Grid.Row="1" Grid.Column="1" Content="Ключ"   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FFD5D8E3"></Label>
+        <RichTextBox Name="KeyText" Grid.Row="2"  Grid.Column="1" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
+        <Label Grid.Row="3" Grid.Column="1" Content="Вектор инициализации "   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FFD5D8E3"></Label>
+        <RichTextBox Name="IVText" Grid.Row="4"  Grid.Column="1" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
 
 
 
 
-        <Button Name="EncryptionButton" Grid.Row="2" Grid.Column="1" Background="#992AD247" FontSize="16" Foreground="#FFD3DDFF" Content="Зашифровать" Click="EncryptionButton_Click" />
-        <Button Name="DecryptionButton" Grid.Row="3" Grid.Column="1" Background="#FFB74B45" FontSize="16" Foreground="#FFD3DDFF" Content="Расшифровать" Click="DecryptionButton_Click"/>
+        <Button Name="EncryptionButton" Grid.Row="5" Grid.Column="1" Background="#992AD247" FontSize="16" Foreground="#FFD3DDFF" Content="Зашифровать" Click="EncryptionButton_Click" />
+        <Button Name="DecryptionButton" Grid.Row="6" Grid.Column="1" Background="#FFB74B45" FontSize="16" Foreground="#FFD3DDFF" Content="Расшифровать" Click="DecryptionButton_Click"/>
 
 
         <Grid.RowDefinitions>
+
             <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="300"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="120"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="120"></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
+   
 
         </Grid.RowDefinitions>
 
