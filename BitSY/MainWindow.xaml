@@ -3,18 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BitSY"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" 
+        Title="MainWindow" Height="500" Width="800" 
         WindowStyle="None"
-        AllowsTransparency="True">
+        AllowsTransparency="True" Loaded="MainWindow_OnLoaded">
 
     <Window.Resources>
         <Style x:Key="MainMenuStyle">
             <Setter Property="Control.Background" Value="#2f3033" />
             <Setter Property="Control.Foreground" Value="#d5d8e3" />
         </Style>
-
 
         <Style  x:Key="MenuItemStyle"  TargetType="{x:Type MenuItem}">
             <Style.Triggers>
@@ -98,12 +96,9 @@
         </Style>
     </Window.Resources>
 
+    <Grid Background="#414245" MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown">
 
-
-
-    <Grid Background="#414245">
-
-        <Menu Name="TopMenu" Grid.Row="0" Grid.ColumnSpan="2"   Height="Auto"  Style="{StaticResource MainMenuStyle}" MouseLeftButtonDown="TopMenu_OnMouseLeftButtonDown">
+        <Menu  Name="TopMenu" Grid.Row="0" Grid.ColumnSpan="6"   Height="Auto"  Style="{StaticResource MainMenuStyle}">
 
             <Menu.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -114,51 +109,52 @@
 
             <MenuItem Header="Файл" Style="{StaticResource MenuItemStyle}" >
                 <MenuItem Name="Open" Header="Открыть" Click="Open_OnClick" />
-                <MenuItem Name="SaveImage" Header="Сохранить изображение" Click="SaveAs_OnClick"/>
-                <MenuItem Name="SaveKey" Header="Сохранить ключ" Click="SaveAs_OnClick"/>
+                <MenuItem Name="SaveImage" Header="Сохранить изображение" Click="SaveImage_OnClick"/>
+                <MenuItem Name="SaveKey" Header="Сохранить ключ" Click="SaveKey_OnClick"/>
+            </MenuItem>
+
+            <MenuItem Header="Режим" Style="{StaticResource MenuItemStyle}" >
+                <MenuItem Name="EncryptionMode" Header="Шифрование" Click="EncryptMode_OnClick"/>
+                <MenuItem Name="DecryptionMode" Header="Дешифровка " Click="DEncryptMode_OnClick"/>
+
             </MenuItem>
 
             <MenuItem Name="Minimize" Header="Свернуть" HorizontalAlignment="Right" Click="Minimize_OnClick" />
             <MenuItem Name="Close" Header="Выход" HorizontalAlignment="Right" Click="Close_OnClick"/>
         </Menu>
 
-        <ScrollViewer Grid.Row="1" Grid.RowSpan="4" Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto ">
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto ">
             <Image  Name="TargetImage" />
         </ScrollViewer>
 
+        <Label Grid.Row="3" Grid.Column="1" Content="Текст"  FontSize="16"   VerticalAlignment="Bottom" HorizontalAlignment="Center"  Foreground="#FFD5D8E3" />
+        <RichTextBox Name="TargetText" Grid.Row="4" Grid.RowSpan="2" Grid.Column="1" FontSize="16" Background="#FF2D2E33" Foreground="#FFD5D8E3" VerticalScrollBarVisibility="Auto" ></RichTextBox>
 
+        <Label Grid.Row="1" Grid.Column="3" Content="Ключ"  FontSize="16"   VerticalAlignment="Bottom" HorizontalAlignment="Center" Foreground="#FFD5D8E3"/>
+        <TextBox Name="KeyText" Grid.Row="2"  Grid.Column="3" FontSize="16" Background="#FF2D2E33" Foreground="#FFD5D8E3" TextWrapping="Wrap" />
 
-        <RichTextBox Name="TargetText" Grid.Row="5" Grid.RowSpan="2" Grid.Column="0" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
-
-        <Label Grid.Row="1" Grid.Column="1" Content="Ключ"   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FFD5D8E3"></Label>
-        <RichTextBox Name="KeyText" Grid.Row="2"  Grid.Column="1" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
-        <Label Grid.Row="3" Grid.Column="1" Content="Вектор инициализации "   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FFD5D8E3"></Label>
-        <RichTextBox Name="IVText" Grid.Row="4"  Grid.Column="1" FontSize="20" Background="#FF2D2E33" Foreground="#FFD5D8E3" ></RichTextBox>
-
-
-
-
-        <Button Name="EncryptionButton" Grid.Row="5" Grid.Column="1" Background="#992AD247" FontSize="16" Foreground="#FFD3DDFF" Content="Зашифровать" Click="EncryptionButton_Click" />
-        <Button Name="DecryptionButton" Grid.Row="6" Grid.Column="1" Background="#FFB74B45" FontSize="16" Foreground="#FFD3DDFF" Content="Расшифровать" Click="DecryptionButton_Click"/>
-
+        <Button Name="EncryptionButton" Grid.Row="4" Grid.ColumnSpan="2" Grid.Column="3" Background="#FF38B34D" FontSize="18" Foreground="#FFD3DDFF" Content="Зашифровать" Click="EncryptionButton_Click" OpacityMask="#FF3A3838" />
+        <Button Name="DecryptionButton" Grid.Row="5" Grid.ColumnSpan="2"  Grid.Column="3" Background="#FFB74B45" FontSize="18" Foreground="#FFD3DDFF" Content="Расшифровать" Click="DecryptionButton_Click"/>
 
         <Grid.RowDefinitions>
 
-            <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="120"></RowDefinition>
-            <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="120"></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-   
+            <RowDefinition Height="30" />
+            <RowDefinition Height="35" />
+            <RowDefinition Height="240" />
+
+
+            <RowDefinition Height="35" />
+            <RowDefinition />
+            <RowDefinition />
 
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="600"></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
-
+            <ColumnDefinition  Width="10"/>
+            <ColumnDefinition Width="600" />
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition />
+            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
 
     </Grid>
