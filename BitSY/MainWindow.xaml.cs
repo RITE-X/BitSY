@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -17,14 +8,15 @@ using Microsoft.Win32;
 
 namespace BitSY
 {
-
     public partial class MainWindow : Window
     {
+        private string _password;
+        private byte[] _targetImageInBytes;
+
         public MainWindow()
         {
             InitializeComponent();
         }
-
 
         private void Minimize_OnClick(object sender, RoutedEventArgs e)
         {
@@ -36,18 +28,40 @@ namespace BitSY
             Close();
         }
 
-        private void TopMenu_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void UIElement_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            DragMove();//TODO FIX
+            DragMove();
         }
 
-        private void SaveAs_OnClick(object sender, RoutedEventArgs e)
+
+        private void SaveImage_OnClick(object sender, RoutedEventArgs e)
         {
+            if (_targetImageInBytes is null)
+            {
+                MessageBox.Show("Изображение отсутствует!", "BitSY", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             var saveFileDialog = new SaveFileDialog();
             if (saveFileDialog.ShowDialog() == true)
             {
-                File.WriteAllBytes(saveFileDialog.FileName, _targetImageInBytes);
+                File.WriteAllBytes(saveFileDialog.FileName + ".bmp", _targetImageInBytes);
+            }
+        }
 
+        private void SaveKey_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_password is null)
+            {
+                MessageBox.Show("Ключ еще не был сгенерирован!", "BitSY", MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            var saveFileDialog = new SaveFileDialog();
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                File.WriteAllText(saveFileDialog.FileName + ".key", _password);
             }
         }
 
@@ -58,66 +72,140 @@ namespace BitSY
                 Filter = "Image file (*.bmp) | *.bmp"
             };
 
-            if (openFileDialog.ShowDialog() == true)
-            {
-                TargetImage.Source = new BitmapImage(new Uri(openFileDialog.FileName));
-                _targetImageInBytes = File.ReadAllBytes(openFileDialog.FileName);
-            }
+            if (openFileDialog.ShowDialog() != true) return;
+
+            TargetImage.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+            _targetImageInBytes = File.ReadAllBytes(openFileDialog.FileName);
         }
 
         private int AvailableSpace(int byteCount)
         {
-            return byteCount * 2 / 8;
-
+            return (byteCount * 2 / 8) - 58;
         }
 
-        private byte[] Key;
-        private byte[] IV;
-        private byte[] _targetImageInBytes;
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            SetMode(Mode.Encryption);
+        }
 
-        private string _keyToSave;
+        private void EncryptMode_OnClick(object sender, RoutedEventArgs e)
+        {
+            SetMode(Mode.Encryption);
+        }
+
+        private void DEncryptMode_OnClick(object sender, RoutedEventArgs e)
+        {
+            SetMode(Mode.Decryption);
+        }
+
+        private void SetMode(Mode mode)
+        {
+            switch (mode)
+            {
+                case Mode.Encryption:
+                    DecryptionButton.IsEnabled = false;
+                    EncryptionButton.IsEnabled = true;
+                    TargetText.IsReadOnly = false;
+                    break;
+                case Mode.Decryption:
+                    DecryptionButton.IsEnabled = true;
+                    EncryptionButton.IsEnabled = false;
+                    TargetText.IsReadOnly = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
+        }
+
 
         private void EncryptionButton_Click(object sender, RoutedEventArgs e)
         {
-
-
-            var userText = new TextRange(TargetText.Document.ContentStart, TargetText.Document.ContentEnd).Text[..^2];//For removing \r\n
-
-
-            var availableSpace = AvailableSpace(_targetImageInBytes.Length);
-
-            if (userText.Length > availableSpace)
+            if (_targetImageInBytes is null)
             {
-                MessageBox.Show($"Количество символов превышает допустимое значение {availableSpace} байт, к текущему изображению", "BitSY", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Изображение отсутствует!", "BitSY", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            using (var aesAlg = Aes.Create())
+            var userText =
+                new TextRange(TargetText.Document.ContentStart, TargetText.Document.ContentEnd).Text[..^2]; //For removing \r\n
+
+            if (string.IsNullOrEmpty(userText))
             {
-                Key = aesAlg.Key;
-                IV = aesAlg.IV;
-
-                var encyptedData = StringCipher.EncryptToBytes(userText, Key, IV);
-
-                var encyptedBites = Convert.BytesToBits(encyptedData);
-
-                _targetImageInBytes = Stenographer.WriteBitesInBitmap(encyptedBites, _targetImageInBytes);
-
-                //var dencyptedData = StringCipher.DecryptFromBytes(encyptedData, aesAlg.Key, aesAlg.IV);
+                MessageBox.Show("Текст для шифрования отсутствует!", "BitSY", MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
             }
 
+
+            if (string.IsNullOrEmpty(KeyText.Text))
+            {
+                MessageBox.Show("Ключ шифрования отсутствует!", "BitSY", MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            _password = KeyText.Text;
+
+            var availableSpace = AvailableSpace(_targetImageInBytes.Length);
+
+            if (userText.Length > availableSpace)//fix
+            {
+                MessageBox.Show(
+                    $"Количество символов превышает допустимое значение {availableSpace} байт, к текущему изображению",
+                    "BitSY", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+
+            //var bitesCount = (userText.Length+ (userText.Length%16==0? 16: 16- (userText.Length%16))) * 8;
+
+            var encryptedData = StringCipher.EncryptToBytes(userText, _password);
+
+            var encryptedBits = Convert.BytesToBits(encryptedData);
+
+            Stenographer.WriteTextLenghtToBitmap(ref _targetImageInBytes, encryptedBits.Length);
+
+            Stenographer.WriteBitsInBitmap(encryptedBits, ref _targetImageInBytes);
+
+
+          
+
+
+            MessageBox.Show($"Информация зашифрована! Для того что бы сохранить данные, нажмите файл->сохранить..",
+                "BitSY", MessageBoxButton.OK, MessageBoxImage.Information);
+            TargetText.Document.Blocks.Clear();
         }
 
         private void DecryptionButton_Click(object sender, RoutedEventArgs e)
         {
-            var key = new TextRange(KeyText.Document.ContentStart, KeyText.Document.ContentEnd).Text[..^2];
+            var password = KeyText.Text;
 
-            if (key is { Length: > 0 })
+            if (password is not { Length: > 0 })
             {
-                Regex.Matches(key, "");
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "Key file (*.key) | *.key"
+                };
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    _password = File.ReadAllText(openFileDialog.FileName);
+                }
+                else
+                {
+                    return;
+                }
             }
-            var encyptedImage = Stenographer.ReadBitesFromBitmap(_targetImageInBytes,)
-        }
+            else
+            {
+                _password = password;
+            }
 
+            var encryptedImage = Stenographer.ReadBitsFromBitmap(_targetImageInBytes, Stenographer.ReadTextLenghtFromBitmap(_targetImageInBytes));
+            var encryptedText = Convert.BitsToBytes(encryptedImage);
+            var encryptedData = StringCipher.DecryptFromBytes(encryptedText, _password);
+
+            TargetText.Document.Blocks.Clear();
+            TargetText.Document.Blocks.Add(new Paragraph(new Run(encryptedData)));
+        }
     }
 }
