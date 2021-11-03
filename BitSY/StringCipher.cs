@@ -1,37 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace BitSY
 {
     internal static class StringCipher
     {
-
-        public static byte[] EncryptToBytes(string plainText, byte[] key, byte[] IV)
+        public static byte[] EncryptToBytes(string plainText, string password)
         {
             if (plainText is not { Length: > 0 })
                 throw new ArgumentNullException(nameof(plainText));
-            if (key is not { Length: > 0 })
-                throw new ArgumentNullException(nameof(key));
-            if (IV is not { Length: > 0 })
-                throw new ArgumentNullException(nameof(IV));
+            if (password is not { Length: > 0 })
+                throw new ArgumentNullException(nameof(password));
+
             byte[] encrypted;
 
-
-            using (var aesAlg = Aes.Create())
+            using (var aesAlgorim = Aes.Create())
             {
-                aesAlg.Key = key;
-                aesAlg.IV = IV;
+                var passwordBytes = Encoding.Latin1.GetBytes(password);
 
-   
-                var encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+                aesAlgorim.Key = SHA256.Create().ComputeHash(passwordBytes);
+                aesAlgorim.IV = MD5.Create().ComputeHash(passwordBytes);
 
-          
+                aesAlgorim.Mode = CipherMode.CBC;
+                aesAlgorim.Padding = PaddingMode.PKCS7;
+
+                var encryptor = aesAlgorim.CreateEncryptor(aesAlgorim.Key, aesAlgorim.IV);
+
                 using (var msEncrypt = new MemoryStream())
                 {
                     using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
@@ -40,33 +36,37 @@ namespace BitSY
                         {
                             swEncrypt.Write(plainText);
                         }
+
                         encrypted = msEncrypt.ToArray();
                     }
                 }
             }
+
             return encrypted;
         }
 
-        public static string DecryptFromBytes(byte[] cipherText, byte[] key, byte[] IV)
+        public static string DecryptFromBytes(byte[] cipherText, string password)
         {
             if (cipherText is not { Length: > 0 })
                 throw new ArgumentNullException(nameof(cipherText));
-            if (key is not { Length: > 0 })
-                throw new ArgumentNullException(nameof(key));
-            if (IV is not { Length: > 0 })
-                throw new ArgumentNullException(nameof(IV));
+            if (password is not { Length: > 0 })
+                throw new ArgumentNullException(nameof(password));
 
 
             string plaintext;
 
-
-            using (var aesAlg = Aes.Create())
+            using (var aesAlgorim = Aes.Create())
             {
-                aesAlg.Key = key;
-                aesAlg.IV = IV;
+                var passwordBytes = Encoding.Latin1.GetBytes(password);
 
-          
-                var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+                aesAlgorim.Key = SHA256.Create().ComputeHash(passwordBytes);
+                aesAlgorim.IV = MD5.Create().ComputeHash(passwordBytes);
+
+                aesAlgorim.Mode = CipherMode.CBC;
+                aesAlgorim.Padding = PaddingMode.PKCS7;
+
+                var decryptor = aesAlgorim.CreateDecryptor(aesAlgorim.Key, aesAlgorim.IV);
 
                 using (var msDecrypt = new MemoryStream(cipherText))
                 {
@@ -74,8 +74,6 @@ namespace BitSY
                     {
                         using (var srDecrypt = new StreamReader(csDecrypt))
                         {
-
-               
                             plaintext = srDecrypt.ReadToEnd();
                         }
                     }
