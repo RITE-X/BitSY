@@ -12,6 +12,7 @@ namespace BitSY
     {
         private string _password;
         private byte[] _targetImageInBytes;
+        private Mode _mode;
 
         public MainWindow()
         {
@@ -33,6 +34,49 @@ namespace BitSY
             DragMove();
         }
 
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            SetMode(Mode.Encryption);
+        }
+
+        private void EncryptMode_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_mode != Mode.Encryption)
+            {
+                SetMode(Mode.Encryption);
+                ResetAppData();
+            }
+        }
+
+        private void DEncryptMode_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_mode != Mode.Decryption)
+            {
+                SetMode(Mode.Decryption);
+                ResetAppData();
+            }
+
+        }
+
+        private void SetMode(Mode mode)
+        {
+            _mode = mode;
+            switch (mode)
+            {
+                case Mode.Encryption:
+                    DecryptionButton.IsEnabled = false;
+                    EncryptionButton.IsEnabled = true;
+                    TargetText.IsReadOnly = false;
+                    break;
+                case Mode.Decryption:
+                    DecryptionButton.IsEnabled = true;
+                    EncryptionButton.IsEnabled = false;
+                    TargetText.IsReadOnly = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
+        }
 
         private void SaveImage_OnClick(object sender, RoutedEventArgs e)
         {
@@ -74,49 +118,25 @@ namespace BitSY
 
             if (openFileDialog.ShowDialog() != true) return;
 
+            ResetAppData();
             TargetImage.Source = new BitmapImage(new Uri(openFileDialog.FileName));
             _targetImageInBytes = File.ReadAllBytes(openFileDialog.FileName);
+       
         }
 
         private int AvailableSpace(int byteCount)
         {
-            return (byteCount * 2 / 8) - 58;
+            return byteCount / 4 - 58;
         }
 
-        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        private void ResetAppData()
         {
-            SetMode(Mode.Encryption);
+            _password = null;
+            _targetImageInBytes = null;
+            KeyText.Text = string.Empty;
+            TargetImage.Source = null;
+            TargetText.Document.Blocks.Clear();
         }
-
-        private void EncryptMode_OnClick(object sender, RoutedEventArgs e)
-        {
-            SetMode(Mode.Encryption);
-        }
-
-        private void DEncryptMode_OnClick(object sender, RoutedEventArgs e)
-        {
-            SetMode(Mode.Decryption);
-        }
-
-        private void SetMode(Mode mode)
-        {
-            switch (mode)
-            {
-                case Mode.Encryption:
-                    DecryptionButton.IsEnabled = false;
-                    EncryptionButton.IsEnabled = true;
-                    TargetText.IsReadOnly = false;
-                    break;
-                case Mode.Decryption:
-                    DecryptionButton.IsEnabled = true;
-                    EncryptionButton.IsEnabled = false;
-                    TargetText.IsReadOnly = true;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
-            }
-        }
-
 
         private void EncryptionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -126,8 +146,7 @@ namespace BitSY
                 return;
             }
 
-            var userText =
-                new TextRange(TargetText.Document.ContentStart, TargetText.Document.ContentEnd).Text[..^2]; //For removing \r\n
+            var userText = new TextRange(TargetText.Document.ContentStart, TargetText.Document.ContentEnd).Text;
 
             if (string.IsNullOrEmpty(userText))
             {
@@ -135,7 +154,6 @@ namespace BitSY
                     MessageBoxImage.Warning);
                 return;
             }
-
 
             if (string.IsNullOrEmpty(KeyText.Text))
             {
@@ -156,7 +174,6 @@ namespace BitSY
                 return;
             }
 
-
             //var bitesCount = (userText.Length+ (userText.Length%16==0? 16: 16- (userText.Length%16))) * 8;
 
             var encryptedData = StringCipher.EncryptToBytes(userText, _password);
@@ -167,17 +184,20 @@ namespace BitSY
 
             Stenographer.WriteBitsInBitmap(encryptedBits, ref _targetImageInBytes);
 
-
-          
-
-
             MessageBox.Show($"Информация зашифрована! Для того что бы сохранить данные, нажмите файл->сохранить..",
                 "BitSY", MessageBoxButton.OK, MessageBoxImage.Information);
-            TargetText.Document.Blocks.Clear();
+       
         }
 
         private void DecryptionButton_Click(object sender, RoutedEventArgs e)
         {
+
+            if (_targetImageInBytes is null)
+            {
+                MessageBox.Show("Изображение отсутствует!", "BitSY", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             var password = KeyText.Text;
 
             if (password is not { Length: > 0 })
@@ -189,6 +209,7 @@ namespace BitSY
                 if (openFileDialog.ShowDialog() == true)
                 {
                     _password = File.ReadAllText(openFileDialog.FileName);
+                    KeyText.Text = _password;
                 }
                 else
                 {

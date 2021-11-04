@@ -20,6 +20,7 @@ namespace BitSY
             {
                 var passwordBytes = Encoding.Latin1.GetBytes(password);
 
+                
                 aesAlgorim.Key = SHA256.Create().ComputeHash(passwordBytes);
                 aesAlgorim.IV = MD5.Create().ComputeHash(passwordBytes);
 
