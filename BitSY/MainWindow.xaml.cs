@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -223,7 +224,18 @@ namespace BitSY
 
             var encryptedImage = Stenographer.ReadBitsFromBitmap(_targetImageInBytes, Stenographer.ReadTextLenghtFromBitmap(_targetImageInBytes));
             var encryptedText = Convert.BitsToBytes(encryptedImage);
-            var encryptedData = StringCipher.DecryptFromBytes(encryptedText, _password);
+            string encryptedData;
+            try
+            {
+                 encryptedData = StringCipher.DecryptFromBytes(encryptedText, _password);
+            }
+            catch (CryptographicException)
+            {
+                MessageBox.Show($"Изображение невозможно расшифровать!",
+                    "BitSY", MessageBoxButton.OK, MessageBoxImage.Error);
+                _password = null;
+                return;
+            }
 
             TargetText.Document.Blocks.Clear();
             TargetText.Document.Blocks.Add(new Paragraph(new Run(encryptedData)));
