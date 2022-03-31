@@ -9,28 +9,66 @@ namespace BitSY.Models
         private readonly int _endOfMetadataImage;
 
 
-        public byte[]? BitmapSource { get; set; }
+        private byte[]? _bitmapSource;
+
+        public byte[]? BitmapSource
+        {
+            get => _bitmapSource;
+            set
+            {
+                _bitmapSource = value;
+                BitmapEnd = _bitmapSource.Length;
+            }
+        }
+
+
+        private long _bitmapEnd;
+
+        public long BitmapEnd
+        {
+            get => BitmapSource?.Length - sizeof(int) ?? _endOfMetadataImage;
+            set => Set(ref _bitmapEnd, value);
+        }
+
+        private long _textLengthPosition;
+
+        public long TextLengthPosition
+        {
+            get => _textLengthPosition;
+            set => Set(ref _textLengthPosition, value);
+        }
 
 
         private int _writeBitCount;
+
+        public int WriteBitCount
+        {
+            get => _writeBitCount;
+            set => Set(ref _writeBitCount, value);
+        }
 
 
         public BitmapStenographer(int endOfMetadata)
         {
             if (endOfMetadata <= 0) throw new ArgumentOutOfRangeException(nameof(endOfMetadata));
             _endOfMetadataImage = endOfMetadata;
-            
-            _writeBitCount = 2; //default value 
+
+            _textLengthPosition = endOfMetadata; //default value 
+            _writeBitCount = 1; //default value 
         }
 
         
         public void WriteBitsInBitmap(bool[] content)
         {
             var iterator = 0;
-            for (var i = 58; i < BitmapSource.Length && iterator != content.Length; i++)
+            for (var i = _endOfMetadataImage; i < BitmapEnd && iterator != content.Length; i++)
             {
+                if (i >= TextLengthPosition && i < TextLengthPosition + sizeof(int))
+                    continue;
+
+
                 var color = Convert.ByteToBits(BitmapSource[i]);
-                for (var j = 0; j < 2; j++)
+                for (var j = 0; j < _writeBitCount; j++)
                 {
                     color[j] = content[iterator];
                     iterator++;
@@ -42,12 +80,25 @@ namespace BitSY.Models
 
         public bool[] ReadBitsFromBitmap(int count)
         {
+            var readRange = count / _writeBitCount + _endOfMetadataImage;
+            if (readRange > BitmapEnd)
+                throw new ArgumentOutOfRangeException(paramName: nameof(count));
+
             var myWord = new bool[count];
             var iterator = 0;
-            for (var i = 58; i < count / 2 + 58; i++)
+
+
+            for (var i = _endOfMetadataImage; i < readRange; i++)
             {
+                if (i >= TextLengthPosition && i < TextLengthPosition + sizeof(int))
+                {
+                    readRange++;
+                    continue;
+                }
+
+
                 var color = Convert.ByteToBits(BitmapSource[i]);
-                for (var j = 0; j < 2; j++)
+                for (var j = 0; j < _writeBitCount; j++)
                 {
                     myWord[iterator] = color[j];
                     iterator++;
@@ -61,7 +112,7 @@ namespace BitSY.Models
         {
             var lenghtInBytes = Convert.IntToBytes(lenght);
 
-            for (int i = 54, j = 0; i < 58; i++, j++)
+            for (long i = TextLengthPosition, j = 0; i < TextLengthPosition + sizeof(int); i++, j++)
             {
                 BitmapSource[i] = lenghtInBytes[j];
             }
@@ -69,8 +120,8 @@ namespace BitSY.Models
 
         public int ReadTextLenghtFromBitmap()
         {
-            var lenghtInBytes = new byte[4];
-            for (int i = 54, j = 0; i < 58; i++, j++)
+            var lenghtInBytes = new byte[sizeof(int)];
+            for (long i = TextLengthPosition, j = 0; i < TextLengthPosition + sizeof(int); i++, j++)
             {
                 lenghtInBytes[j] = BitmapSource[i];
             }

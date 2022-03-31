@@ -46,7 +46,43 @@
         <TextBox Grid.Row="2" Grid.Column="3" FontSize="16" Background="#FF2D2E33" Foreground="#FFD5D8E3"
                  TextWrapping="Wrap" Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}" />
 
+        <DockPanel Grid.Row="3" Grid.Column="3" Grid.RowSpan="2" VerticalAlignment="Center">
+            <Border BorderThickness="1" BorderBrush="#FFABADB3">
+                <StackPanel>
+                    <DockPanel Margin="8,5,8,5">
 
+                        <Label Content="Расположение длины" FontSize="15" DockPanel.Dock="Top" Foreground="#FFD5D8E3"
+                               Margin="2" />
+
+                        <TextBox
+                            Text="{Binding ElementName=SliderKeyPosition, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                            VerticalAlignment="Top" Height="20" DockPanel.Dock="Right" TextAlignment="Right" Width="40"
+                            Background="#FF2D2E33" Foreground="#FFD5D8E3" />
+
+                        <Slider Minimum="54" Maximum="{Binding BitmapStenographer.BitmapEnd }" TickFrequency="1"
+                                IsSnapToTickEnabled="True" Name="SliderKeyPosition"
+                                Foreground="White"
+                                Value="{Binding BitmapStenographer.TextLengthPosition, UpdateSourceTrigger=PropertyChanged}" />
+
+                    </DockPanel>
+
+                    <DockPanel Margin="8,5,8,5">
+                        <Label Content="Кол-во бит" FontSize="15" DockPanel.Dock="Top" Foreground="#FFD5D8E3"
+                               Margin="2" />
+
+                        <TextBox
+                            Text="{Binding ElementName=SliderBitCount, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                            VerticalAlignment="Top" Height="20" DockPanel.Dock="Right" TextAlignment="Right" Width="40"
+                            Background="#FF2D2E33" Foreground="#FFD5D8E3" />
+
+                        <Slider Minimum="1" Maximum="2" TickFrequency="1" IsSnapToTickEnabled="True"
+                                Name="SliderBitCount" Foreground="White"
+                                Value="{Binding BitmapStenographer.WriteBitCount, UpdateSourceTrigger=PropertyChanged}" />
+                    </DockPanel>
+
+                </StackPanel>
+            </Border>
+        </DockPanel>
 
         <TextBox Grid.Row="5" Grid.RowSpan="2" Grid.Column="1" FontSize="16" Background="#FF2D2E33"
                  Foreground="#FFD5D8E3" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True"
@@ -94,7 +130,7 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="0.4*" />
             <RowDefinition Height="3.5*" />
-            <RowDefinition Height="0" />
+            <RowDefinition Height="2*" />
             <RowDefinition Height="0.4*" />
             <RowDefinition />
             <RowDefinition />
