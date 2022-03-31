@@ -1,0 +1,113 @@
+﻿<Window x:Class="BitSY.ViewModels.View.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:view="clr-namespace:BitSY.ViewModels.View"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="800"
+        WindowStyle="None"
+
+        AllowsTransparency="True">
+
+    <Window.DataContext>
+        <view:MainWindowViewModel />
+
+    </Window.DataContext>
+
+
+    <Grid Background="#414245">
+
+        <Menu Grid.Row="0" Grid.ColumnSpan="6" Height="Auto" Style="{StaticResource MainMenuStyle}">
+
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Center" />
+                </ItemsPanelTemplate>
+
+            </Menu.ItemsPanel>
+
+            <MenuItem Header="Файл" Style="{StaticResource MenuItemStyle}">
+                <MenuItem Header="Открыть" Command="{Binding OpenImageCommand}" />
+                <MenuItem Header="Сохранить изображение" Command="{Binding SaveImageCommand}" />
+                <MenuItem Header="Сохранить ключ" Command="{Binding SaveKeyCommand}" />
+            </MenuItem>
+
+
+            <MenuItem Header="Свернуть" HorizontalAlignment="Right" Command="{Binding MinimazeMainWindowCommand}" />
+            <MenuItem Header="Выход" HorizontalAlignment="Right" Command="{Binding CloseMainWindowCommand}" />
+        </Menu>
+
+        <Image Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" Source="{Binding ImageSource}" />
+
+        <Label Grid.Row="4" Grid.Column="1" Content="Текст" FontSize="15" VerticalAlignment="Bottom"
+               HorizontalAlignment="Center" Foreground="#FFD5D8E3" />
+
+        <TextBox Grid.Row="2" Grid.Column="3" FontSize="16" Background="#FF2D2E33" Foreground="#FFD5D8E3"
+                 TextWrapping="Wrap" Text="{Binding Key, UpdateSourceTrigger=PropertyChanged}" />
+
+
+
+        <TextBox Grid.Row="5" Grid.RowSpan="2" Grid.Column="1" FontSize="16" Background="#FF2D2E33"
+                 Foreground="#FFD5D8E3" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True"
+                 AcceptsTab="True"
+                 IsReadOnly="{Binding ElementName=DecryptModeRadio,Path=IsChecked, UpdateSourceTrigger=PropertyChanged  }"
+                 Text="{Binding TargetText, UpdateSourceTrigger=PropertyChanged}" />
+
+        <Label Grid.Row="1" Grid.Column="3" Content="Ключ" FontSize="15" VerticalAlignment="Bottom"
+               HorizontalAlignment="Center" Foreground="#FFD5D8E3" />
+
+
+        <DockPanel Grid.Row="5" Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Column="3">
+
+            <UniformGrid Columns="1" DockPanel.Dock="Left" Width="170">
+                <Button DockPanel.Dock="Top" FontSize="17"
+                        Content="Зашифровать" OpacityMask="#FF020202"
+                        IsEnabled="{Binding ElementName= EncryptModeRadio,Path=IsChecked, UpdateSourceTrigger=PropertyChanged  }"
+                        Style="{StaticResource EncryptionButton}"
+                        Command="{Binding EncryptImageCommand}" />
+                <Button DockPanel.Dock="Bottom" FontSize="17"
+                        Content="Расшифровать"
+                        IsEnabled="{Binding ElementName= DecryptModeRadio,Path=IsChecked, UpdateSourceTrigger=PropertyChanged  }"
+                        Style="{StaticResource DecryptionButton}"
+                        Command="{Binding DecryptImageCommand}" />
+
+            </UniformGrid>
+
+            <UniformGrid Columns="1" DockPanel.Dock="Right" HorizontalAlignment="Center">
+                <Viewbox Height="20" Width="20" VerticalAlignment="Center">
+                    <RadioButton Name="EncryptModeRadio" GroupName="Cipher" VerticalAlignment="Center" IsChecked="True"
+                                 Background="#FF38B34D" /> <!--fix up naming -->
+                </Viewbox>
+
+                <Viewbox Height="20" Width="20" VerticalAlignment="Center">
+                    <RadioButton Name="DecryptModeRadio" GroupName="Cipher" VerticalAlignment="Center"
+                                 Background="#FFB74B45" Command="{Binding SetDecryptionMode}" />
+                </Viewbox>
+
+            </UniformGrid>
+
+
+        </DockPanel>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="0.4*" />
+            <RowDefinition Height="3.5*" />
+            <RowDefinition Height="0" />
+            <RowDefinition Height="0.4*" />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.06*" />
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="0.06*" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="0.06*" />
+        </Grid.ColumnDefinitions>
+
+    </Grid>
+
+</Window>

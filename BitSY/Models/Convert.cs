@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace BitSY
+namespace BitSY.Models
 {
     internal static class Convert
     {
@@ -20,6 +20,8 @@ namespace BitSY
         public static BitArray ByteToBits(byte item)
         {
             var bitArray = new BitArray(8);
+
+          
             for (var i = 0; i < bitArray.Length; i++)
             {
                 var bit = (item >> i & 1) == 1;
